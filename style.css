@@ -1,0 +1,251 @@
+/* 基础变量设置 */
+:root {
+    --bg-color: #FAF7F2;
+    --card-bg: #FFFFFF;
+    --text-main: #2C3E50;
+    --text-muted: #7F8C8D;
+    --primary-color: #4A90E2;
+    --primary-hover: #357ABD;
+    --success-color: #2ECC71;
+    --error-color: #E74C3C;
+    --border-radius: 16px;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 核心布局：三列网格，左右固定等宽，确保中间永远绝对居中 */
+.app-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 240px minmax(300px, 700px) 240px;
+    gap: 30px;
+    width: 100%;
+    max-width: 1300px;
+    margin: 40px auto;
+    align-items: start;
+    justify-content: center;
+}
+
+.main-content {
+    width: 100%;
+}
+
+.side-panel {
+    position: sticky;
+    top: 80px; /* 修改：页面往下滚时，吸顶位置也往下移一点，保持呼吸感 */
+    margin-top: 75px; /* ★ 新增：初始状态往下推，和中间的白底卡片对齐 */
+    transition: opacity 0.3s ease;
+}
+
+/* 占位隐藏类：元素不可见，但保留占位空间，防止中间模块偏移 */
+.panel-hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- 组件样式 --- */
+.setup-config {
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+.count-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.count-buttons button {
+    padding: 12px;
+    font-size: 14px;
+    margin-bottom: 0;
+    background: #fff;
+    border: 2px solid #ddd;
+    color: var(--text-main);
+}
+.count-buttons button.active {
+    border-color: var(--primary-color);
+    background-color: #EBF5FF;
+    color: var(--primary-color);
+}
+
+.grid-scroll-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    background: #fff;
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid #eee;
+}
+.grid-scroll-container::-webkit-scrollbar { width: 6px; }
+.grid-scroll-container::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+.grid-item {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.grid-item.current { outline: 2px solid var(--primary-color); }
+.grid-item.correct { background-color: var(--success-color); color: white; }
+.grid-item.wrong { background-color: var(--error-color); color: white; }
+
+/* 屏幕切换逻辑 */
+.screen { display: none; animation: fadeIn 0.4s ease; }
+.screen.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1, h2 { text-align: center; margin-bottom: 30px; color: var(--text-main); }
+.section-title { margin-bottom: 15px; font-size: 14px; color: var(--text-muted); font-weight: bold; }
+
+/* 按钮通用样式 */
+button {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 12px;
+}
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.category-buttons button, .btn-primary { background-color: var(--primary-color); color: white; }
+.category-buttons button:hover:not(:disabled), .btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); transform: translateY(-2px); }
+.btn-secondary { background-color: #ECF0F1 !important; color: var(--text-main) !important; }
+.btn-secondary:hover { background-color: #DDE2E6 !important; }
+
+/* 顶部与题目标题 */
+.top-bar { display: flex; margin-bottom: 15px; }
+.btn-text { width: auto; background: transparent; color: var(--primary-color); padding: 8px 12px; font-size: 14px; margin: 0; }
+.btn-text:hover { text-decoration: underline; background: transparent !important; }
+
+.header { display: flex; justify-content: space-between; font-weight: 600; color: var(--text-muted); margin-bottom: 15px; padding: 0 10px; }
+.question-card { background: var(--card-bg); padding: 30px 24px; border-radius: var(--border-radius); box-shadow: var(--shadow); margin-bottom: 24px; }
+.question-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;}
+.badge { display: inline-block; padding: 4px 10px; background-color: #FFF3E0; color: #E67E22; border-radius: 20px; font-size: 12px; font-weight: bold; }
+.question-id { font-size: 12px; color: #BDC3C7; font-family: monospace; margin-bottom: 4px; display: block; }
+#question-text { font-size: 18px; line-height: 1.5; margin-bottom: 24px; }
+
+/* 选项样式与指示器 */
+.option-item { padding: 16px; border: 2px solid #F0F3F4; border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; background: #FAFAFA; }
+.option-item:hover { border-color: var(--primary-color); background: #F4F8FC; }
+.option-item.selected { border-color: var(--primary-color); background-color: #EBF5FF; }
+.option-item.correct { border-color: var(--success-color); background-color: #EAFAF1; }
+.option-item.wrong { border-color: var(--error-color); background-color: #FDEDEC; }
+
+.indicator { width: 20px; height: 20px; border: 2px solid #ddd; margin-right: 12px; flex-shrink: 0; transition: all 0.2s; }
+.mode-single .indicator { border-radius: 50%; }
+.mode-single .option-item.selected .indicator { background: var(--primary-color); border-color: var(--primary-color); box-shadow: inset 0 0 0 3px white; }
+.mode-multiple .indicator { border-radius: 4px; }
+.mode-multiple .option-item.selected .indicator { background: var(--primary-color); border-color: var(--primary-color); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E"); background-size: 80%; background-repeat: no-repeat; background-position: center; }
+
+/* 错题与反馈 */
+.wrong-area { border-top: 1px solid #eee; margin-top: 20px; padding-top: 20px; }
+.wrong-tag { font-size: 11px; background: #f39c12; color: white; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+.feedback { padding: 16px; border-radius: 12px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+.feedback.success { background-color: #EAFAF1; color: var(--success-color); }
+.feedback.error { background-color: #FDEDEC; color: var(--error-color); }
+.auto-tip { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 10px;}
+
+.hidden { display: none !important; }
+.result-stats p { font-size: 18px; margin-bottom: 10px; text-align: center;}
+
+/* 移动端/小屏适配：转换为垂直排列 */
+@media (max-width: 960px) {
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .side-panel { 
+        width: 100%; 
+        max-width: 700px; 
+        position: static; 
+        margin-top: 0; /* ★ 新增：在手机小屏幕上取消顶部的间距，防止留白过大 */
+    }
+    
+    /* 调整显示顺序 */
+    .left-panel { order: 1; margin-bottom: 20px;}
+    .main-content { order: 2; }
+    .right-panel { order: 3; margin-top: 20px;}
+    
+    /* 移动端下不需要隐藏占位，直接不渲染空间 */
+    .panel-hidden {
+        display: none !important;
+    }
+    
+    .count-buttons { flex-direction: row; flex-wrap: wrap; }
+    .count-buttons button { flex: 1; min-width: 80px; }
+}
+
+@media (max-width: 480px) {
+    body { padding: 10px; }
+    .app-container { margin-top: 0px; }
+    .question-card { padding: 20px 16px; }
+    #question-text { font-size: 16px; }
+}
+
+/* 题目附图样式 */
+.question-image-container img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.question-image-container img:hover {
+    transform: scale(1.02); /* 鼠标悬停微放大效果 */
+}
+
+.app-footer {
+    text-align: center;
+    padding: 20px 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px dashed #ddd;
+}
+
+.app-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    text-decoration: underline;
+}

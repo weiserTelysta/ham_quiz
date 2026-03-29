@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>业余无线电刷题助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="app-container">
+            
+            <div class="side-panel left-panel" id="left-panel">
+                <div class="panel-section setup-config">
+                    <p class="section-title">练习题数</p>
+                    <div class="count-buttons">
+                        <button class="btn-count active" onclick="setCount(20)">20</button>
+                        <button class="btn-count" onclick="setCount(50)">50</button>
+                        <button class="btn-count" onclick="setCount(100)">100</button>
+                        <button class="btn-count" onclick="setCount(0)">全部</button>
+                    </div>
+                </div>
+
+                <div class="panel-section setup-config" style="margin-top: 20px;">
+                    <p class="section-title">抽题模式</p>
+                    <div class="count-buttons">
+                        <button class="btn-mode active" onclick="setMode('random')">随机模式</button>
+                        <button class="btn-mode" onclick="setMode('norepeat')">不重复模式</button>
+                    </div>
+                    <p id="mode-tip" style="font-size: 12px; color: var(--text-muted); margin-top: 12px; margin-bottom: 0; text-align: center;">随机抽取，题目可能重复</p>
+                    <button class="btn-text" style="font-size: 12px; margin-top: 5px; color: var(--error-color); display: none; width: 100%; text-align: center;" id="clear-history-btn" onclick="clearHistory()">重置刷题进度</button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <h1>📻 无线电刷题助手</h1>
+
+                <div id="setup-screen" class="screen active">
+                    <p class="section-title" style="text-align: center;">请选择你的练习题库：</p>
+                    <div class="category-buttons">
+                        <button onclick="startQuiz('bank_a.json')">A 类题库练习</button>
+                        <button onclick="startQuiz('bank_b.json')">B 类题库练习</button>
+                        <button onclick="startQuiz('bank_c.json')">C 类题库练习</button>
+                        <button onclick="startQuiz('full_bank.json')" class="btn-secondary">全类目综合练习</button>
+                    </div>
+                    
+                    <div id="wrong-section" class="wrong-area">
+                        <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 15px;">
+                            <p class="section-title" style="margin-bottom: 0;">针对性错题练习：</p>
+                            <button id="clear-wrong-btn" class="btn-text" style="color: var(--error-color); font-size: 13px; position: absolute; right: 0;" onclick="clearAllWrong()">清空错题</button>
+                        </div>
+                        <div id="wrong-buttons-container"></div>
+                    </div>
+                </div>
+
+                <div id="quiz-screen" class="screen">
+                    <div class="top-bar">
+                        <button class="btn-text" onclick="goBackHome()">⬅ 返回主页</button>
+                    </div>
+                    <div class="header">
+                        <span id="progress">0 / 0</span>
+                        <span id="score-display">得分: 0</span>
+                    </div>
+                    <div class="question-card">
+                        <div class="question-header-row">
+                            <div id="question-type" class="badge">单选题</div>
+                        </div>
+                        <div id="question-text">题目加载中...</div>
+                        <div id="options-container" class="options-grid"></div>
+                    </div>
+                    <div class="actions">
+                        <button id="prev-btn" class="btn-secondary hidden" onclick="prevQuestion()">上一题</button>
+                        <button id="submit-btn" class="btn-primary" onclick="submitAnswer()" disabled>确认答案</button>
+                        <button id="next-btn" class="btn-primary hidden" onclick="nextQuestion()">下一题</button>
+                    </div>
+                    <div id="auto-next-tip" class="auto-tip"></div>
+                    <div id="feedback-area" class="feedback hidden"></div>
+                </div>
+
+                <div id="result-screen" class="screen">
+                    <h2>🎉 练习完成！</h2>
+                    <div class="result-stats">
+                        <p>总题数: <span id="total-q">0</span></p>
+                        <p>正确数: <span id="correct-q">0</span></p>
+                        <p>准确率: <span id="accuracy">0%</span></p>
+                    </div>
+                    <button class="btn-primary" onclick="goBackHome()">返回主页</button>
+                </div>
+            </div>
+
+            <div class="side-panel right-panel" id="right-panel">
+            <div id="search-section" class="panel-section setup-config">
+                <p class="section-title">快速查题</p>
+                <input type="text" id="search-input" placeholder="输入 ID、编号或关键字..." 
+                    style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
+                <div id="search-results" class="grid-scroll-container" style="max-height: 40vh; display:none;">
+                    </div>
+            </div>
+
+            <div id="progress-section" class="panel-section" style="display:none;">
+                <p class="section-title">答题进度</p>
+                <div class="grid-scroll-container">
+                    <div id="progress-grid" class="grid-container"></div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+        <footer class="app-footer">
+            <p>如有问题或建议，请联系：
+                <a href="mailto:weiser@telysta.com">weiser@telysta.com</a>
+            </p>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+    
+</body>
+</html>
