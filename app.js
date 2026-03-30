@@ -10,7 +10,11 @@ let userAnswers = []; // null(未做), true(对), false(错)
 let isNoRepeatMode = false; // 默认使用随机模式
 let historyStore = JSON.parse(localStorage.getItem('ham_history_v3')) || {}; // 记录做过的题
 let searchPool = [];
-
+let userSelections = []; // ★ 新增：记录每道题用户具体选了哪些选项
+let isExamMode = false;  // ★ 新增：是否处于考试模式
+let examTimer = null;    // ★ 新增：考试倒计时定时器
+let examTimeLeft = 0;    // ★ 新增：剩余秒数
+let passScore = 0;       // ★ 新增：及格分数线
 let wrongStore = JSON.parse(localStorage.getItem('ham_wrong_v3')) || {};
 
 window.onload = async function() {
@@ -163,7 +167,6 @@ function clearHistory() {
 }
 
 // 开始普通练习
-// 开始普通练习
 async function startQuiz(filename) {
     currentBankName = filename;
     try {
@@ -221,10 +224,10 @@ function initQuiz() {
     currentQuestionIndex = 0;
     score = 0;
     userAnswers = new Array(questions.length).fill(null);
-    
+    userSelections = new Array(questions.length).fill(null); // ★ 新增初始化
+
     showScreen('quiz-screen');
     
-    // 答题时：隐藏左侧设置、隐藏右侧搜索、显示右侧进度
     document.getElementById('left-panel').classList.add('panel-hidden');
     document.getElementById('search-section').style.display = 'none';
     document.getElementById('progress-section').style.display = 'block';
@@ -276,10 +279,10 @@ function loadQuestion() {
     let imageHtml = '';
     // 只有当 q.image 存在且不为空时，才生成图片 HTML
     if (q.image) {
-        // 兼容性处理：如果后端数据没带后缀，前端自动补全（根据你之前的 Python 代码，建议统一后缀或保持原样）
+        // 兼容性处理：如果后端数据没带后缀，前端自动补全
         let imgSrc = q.image;
         if (!imgSrc.includes('.')) {
-            imgSrc += '.webp'; // 或者 .jpg，取决于你文件夹里的实际格式
+            imgSrc += '.webp'; 
         }
 
         imageHtml = `
@@ -292,13 +295,12 @@ function loadQuestion() {
         `;
     }
 
-    // 将 ID、文字、图片统一渲染，如果 imageHtml 为空字符串，则不会在页面占用任何空间
+    // 将 ID、文字、图片统一渲染
     document.getElementById('question-text').innerHTML = `
         <span class="question-id">ID: ${q.id} ${streakHtml}</span>
         <div style="margin-bottom: 10px;">${q.question}</div>
         ${imageHtml} 
     `;
-    // --- 图片处理结束 ---
 
     document.getElementById('progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
     document.getElementById('score-display').innerText = `得分: ${score}`;
@@ -327,11 +329,40 @@ function loadQuestion() {
     }
     
     updateGridVisuals();
+
+    if (userAnswers[currentQuestionIndex] !== null) {
+        const savedSelections = userSelections[currentQuestionIndex] || [];
+        const isCorrect = userAnswers[currentQuestionIndex];
+        
+        // 恢复选项的视觉状态
+        document.querySelectorAll('.option-item').forEach(el => {
+            const key = el.querySelector('span:nth-child(2)').innerText.replace('.', '').trim();
+            if (q.answer.includes(key)) el.classList.add('correct');
+            else if (savedSelections.includes(key)) el.classList.add('wrong');
+            
+            if (savedSelections.includes(key)) el.classList.add('selected');
+        });
+
+        // 按钮状态：隐藏确认按钮，显示下一题/查看结果
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('next-btn').classList.remove('hidden');
+        document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "查看结果" : "下一题";
+        
+        // 显示反馈区域，但不触发 3 秒倒计时
+        const fb = document.getElementById('feedback-area');
+        fb.classList.remove('hidden');
+        fb.className = `feedback ${isCorrect ? 'success' : 'error'}`;
+        fb.innerHTML = isCorrect ? "✅ 回答正确！" : `❌ 错误。正确答案: ${q.answer.join('')}`;
+        
+        // 清除任何可能的自动下一题提示
+        document.getElementById('auto-next-tip').innerText = "";
+    }
 }
 
 // 点击选项逻辑
 function handleOptionClick(el, key, isMultiple) {
-    if (!document.getElementById('next-btn').classList.contains('hidden')) return; 
+    if (userAnswers[currentQuestionIndex] !== null) return;
+    if (!document.getElementById('next-btn').classList.contains('hidden')) return;
     if (isMultiple) {
         selectedOptions.has(key) ? selectedOptions.delete(key) : selectedOptions.add(key);
         el.classList.toggle('selected');
@@ -350,6 +381,7 @@ function submitAnswer() {
     const isCorrect = selectedOptions.size === q.answer.length && [...selectedOptions].every(v => q.answer.includes(v));
 
     userAnswers[currentQuestionIndex] = isCorrect; 
+    userSelections[currentQuestionIndex] = [...selectedOptions];
     
     document.querySelectorAll('.option-item').forEach(el => {
         const key = el.querySelector('span:nth-child(2)').innerText.replace('.', '').trim();
@@ -455,6 +487,9 @@ function showResult() {
     document.getElementById('left-panel').classList.add('panel-hidden');
     document.getElementById('right-panel').classList.add('panel-hidden');
     
+    clearInterval(examTimer); // 停止倒计时
+    document.getElementById('exam-timer-display').classList.add('hidden');
+    
     showScreen('result-screen');
     
     document.getElementById('total-q').innerText = questions.length;
@@ -462,6 +497,21 @@ function showResult() {
     
     const accuracy = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
     document.getElementById('accuracy').innerText = `${accuracy}%`;
+
+    // ★ 新增：考试模式及格判定展示
+    const statusEl = document.getElementById('exam-status');
+    if (isExamMode) {
+        statusEl.style.display = 'block';
+        if (score >= passScore) {
+            statusEl.innerHTML = `<h3 style="color: var(--success-color); margin: 20px 0;">✅ 恭喜！模拟考核通过 (及格线: ${passScore}分)</h3>`;
+        } else {
+            statusEl.innerHTML = `<h3 style="color: var(--error-color); margin: 20px 0;">❌ 遗憾！模拟考核未通过 (及格线: ${passScore}分)</h3>`;
+        }
+    } else {
+        statusEl.style.display = 'none';
+    }
+    
+    isExamMode = false; // 重置状态
 }
 
 // 返回主页
@@ -470,4 +520,63 @@ function goBackHome() {
     document.getElementById('search-section').style.display = 'block';
     document.getElementById('progress-section').style.display = 'none';
     location.reload(); 
+}
+
+// ★ 新增：全真模拟考试组卷逻辑
+async function startMockExam(level) {
+    isExamMode = true;
+    
+    // 依据官方 2025 新规配置
+    const examConfig = {
+        'A': { file: 'bank_a.json', single: 32, multi: 8, time: 40 * 60, pass: 30 },
+        'B': { file: 'bank_b.json', single: 45, multi: 15, time: 60 * 60, pass: 45 },
+        'C': { file: 'bank_c.json', single: 70, multi: 20, time: 90 * 60, pass: 70 }
+    }[level];
+
+    passScore = examConfig.pass;
+    examTimeLeft = examConfig.time;
+
+    try {
+        const response = await fetch(examConfig.file);
+        const data = await response.json();
+        
+        // 区分单选和多选并打乱
+        const singles = data.filter(q => q.type !== 'multiple').sort(() => Math.random() - 0.5);
+        const multis = data.filter(q => q.type === 'multiple').sort(() => Math.random() - 0.5);
+
+        // 抽取规定数量合并后再次打乱
+        const selectedQuestions = [
+            ...singles.slice(0, examConfig.single),
+            ...multis.slice(0, examConfig.multi)
+        ].sort(() => Math.random() - 0.5);
+
+        questions = selectedQuestions;
+        
+        document.getElementById('exam-timer-display').classList.remove('hidden');
+        startExamTimer();
+        initQuiz();
+    } catch (e) {
+        console.error(e);
+        alert("考卷加载失败，请检查题库文件。");
+    }
+}
+
+function startExamTimer() {
+    clearInterval(examTimer);
+    updateTimerUI();
+    examTimer = setInterval(() => {
+        examTimeLeft--;
+        updateTimerUI();
+        if (examTimeLeft <= 0) {
+            clearInterval(examTimer);
+            alert("⏰ 考试时间到！系统已自动为您交卷。");
+            showResult();
+        }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const m = Math.floor(examTimeLeft / 60).toString().padStart(2, '0');
+    const s = (examTimeLeft % 60).toString().padStart(2, '0');
+    document.getElementById('exam-timer-display').innerText = `倒计时: ${m}:${s}`;
 }
