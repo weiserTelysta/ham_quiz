@@ -419,25 +419,39 @@ function submitAnswer() {
     document.getElementById('next-btn').classList.remove('hidden');
 
     if (currentQuestionIndex < questions.length - 1) {
-        startAutoNext();
+        if (isCorrect) {
+            // 回答正确：0.5秒后直接下一题，不显示倒计时文字
+            autoTimer = setTimeout(() => nextQuestion(), 500);
+        } else {
+            // 回答错误：调用自动跳转逻辑，给 3 秒时间看正确答案
+            startAutoNext(3); 
+        }
     } else {
         document.getElementById('next-btn').innerText = "查看结果";
     }
 }
 
 // 自动下一题
-function startAutoNext() {
-    let timeLeft = 3;
+function startAutoNext(seconds) {
+    let timeLeft = seconds;
     const tipEl = document.getElementById('auto-next-tip');
+    
+    // 显示提示
     tipEl.innerText = `${timeLeft} 秒后自动下一题...`;
     
+    // 倒计时数字变动
     countdownInterval = setInterval(() => {
         timeLeft--;
-        tipEl.innerText = timeLeft > 0 ? `${timeLeft} 秒后自动下一题...` : "";
-        if (timeLeft <= 0) clearInterval(countdownInterval);
+        if (timeLeft > 0) {
+            tipEl.innerText = `${timeLeft} 秒后自动下一题...`;
+        } else {
+            tipEl.innerText = "";
+            clearInterval(countdownInterval);
+        }
     }, 1000);
 
-    autoTimer = setTimeout(() => nextQuestion(), 3000);
+    // 真正的跳转执行
+    autoTimer = setTimeout(() => nextQuestion(), seconds * 1000);
 }
 
 function resetTimers() {
