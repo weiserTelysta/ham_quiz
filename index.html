@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2025版业余无线电台操作证刷题助手 - A/B/C类最新题库模拟考试</title>
-    <meta name="description" content="专为业余无线电爱好者打造的 2025 年新版操作技术能力验证刷题工具。包含 A类、B类、C类 最新完整题库，提供错题本、不重复抽题及全真模拟考试功能，助你轻松拿证。">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📻</text></svg>">
+    <meta name="description"
+        content="专为业余无线电爱好者打造的 2025 年新版操作技术能力验证刷题工具。包含 A类、B类、C类 最新完整题库，提供错题本、不重复抽题及全真模拟考试功能，助你轻松拿证。">
     <meta name="keywords" content="业余无线电,无线电台操作证,火腿刷题,CRAC题库,2025无线电题库,A类操作证,B类操作证,C类操作证,模拟考试">
     <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
     <div class="page-wrapper">
         <div class="app-container">
-            
+
             <div class="side-panel left-panel" id="left-panel">
                 <div class="panel-section setup-config">
                     <p class="section-title">练习题数</p>
@@ -29,8 +35,12 @@
                         <button class="btn-mode active" onclick="setMode('random')">随机模式</button>
                         <button class="btn-mode" onclick="setMode('norepeat')">不重复模式</button>
                     </div>
-                    <p id="mode-tip" style="font-size: 12px; color: var(--text-muted); margin-top: 12px; margin-bottom: 0; text-align: center;">随机抽取，题目可能重复</p>
-                    <button class="btn-text" style="font-size: 12px; margin-top: 5px; color: var(--error-color); display: none; width: 100%; text-align: center;" id="clear-history-btn" onclick="clearHistory()">重置刷题进度</button>
+                    <p id="mode-tip"
+                        style="font-size: 12px; color: var(--text-muted); margin-top: 12px; margin-bottom: 0; text-align: center;">
+                        随机抽取，题目可能重复</p>
+                    <button class="btn-text"
+                        style="font-size: 12px; margin-top: 5px; color: var(--error-color); display: none; width: 100%; text-align: center;"
+                        id="clear-history-btn" onclick="clearHistory()">重置刷题进度</button>
                 </div>
             </div>
 
@@ -47,19 +57,28 @@
                     </div>
 
                     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ddd;">
-                        <p class="section-title" style="text-align: center; color: var(--error-color);">🏆 全真模拟考试 (2025新规)</p>
-                        <p style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 15px;">按 CRAC 官方题量与时间限制进行组卷倒计时</p>
-                        <div class="category-buttons" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                            <button onclick="startMockExam('A')" style="background-color: #E67E22;">A类模考<br><span style="font-size: 12px; font-weight: normal;">40题/40分钟</span></button>
-                            <button onclick="startMockExam('B')" style="background-color: #D35400;">B类模考<br><span style="font-size: 12px; font-weight: normal;">60题/60分钟</span></button>
-                            <button onclick="startMockExam('C')" style="background-color: #C0392B;">C类模考<br><span style="font-size: 12px; font-weight: normal;">90题/90分钟</span></button>
+                        <p class="section-title" style="text-align: center; color: var(--error-color);">🏆 全真模拟考试
+                            (2025新规)</p>
+                        <p style="font-size: 12px; text-align: center; color: var(--text-muted); margin-bottom: 15px;">按
+                            CRAC 官方题量与时间限制进行组卷倒计时</p>
+                        <div class="category-buttons"
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                            <button onclick="startMockExam('A')" style="background-color: #E67E22;">A类模考<br><span
+                                    style="font-size: 12px; font-weight: normal;">40题/40分钟</span></button>
+                            <button onclick="startMockExam('B')" style="background-color: #D35400;">B类模考<br><span
+                                    style="font-size: 12px; font-weight: normal;">60题/60分钟</span></button>
+                            <button onclick="startMockExam('C')" style="background-color: #C0392B;">C类模考<br><span
+                                    style="font-size: 12px; font-weight: normal;">90题/90分钟</span></button>
                         </div>
                     </div>
-                    
+
                     <div id="wrong-section" class="wrong-area">
-                        <div style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 15px;">
+                        <div
+                            style="display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 15px;">
                             <p class="section-title" style="margin-bottom: 0;">针对性错题练习：</p>
-                            <button id="clear-wrong-btn" class="btn-text" style="color: var(--error-color); font-size: 13px; position: absolute; right: 0;" onclick="clearAllWrong()">清空错题</button>
+                            <button id="clear-wrong-btn" class="btn-text"
+                                style="color: var(--error-color); font-size: 13px; position: absolute; right: 0;"
+                                onclick="clearAllWrong()">清空错题</button>
                         </div>
                         <div id="wrong-buttons-container"></div>
                     </div>
@@ -68,9 +87,11 @@
                 <div id="quiz-screen" class="screen">
                     <div class="top-bar" style="justify-content: space-between;">
                         <button class="btn-text" onclick="goBackHome()">⬅ 返回主页</button>
-                        <div id="exam-timer-display" class="hidden" style="color: var(--error-color); font-weight: bold; padding: 8px 12px; background: #FDEDEC; border-radius: 8px; font-size: 14px;">倒计时: 00:00</div>
+                        <div id="exam-timer-display" class="hidden"
+                            style="color: var(--error-color); font-weight: bold; padding: 8px 12px; background: #FDEDEC; border-radius: 8px; font-size: 14px;">
+                            倒计时: 00:00</div>
                     </div>
-                    
+
                     <div class="header">
                         <span id="progress">0 / 0</span>
                         <span id="score-display">得分: 0</span>
@@ -93,7 +114,7 @@
 
                 <div id="result-screen" class="screen">
                     <h2>🎉 练习完成！</h2>
-                    <div id="exam-status" style="text-align: center;"></div> 
+                    <div id="exam-status" style="text-align: center;"></div>
                     <div class="result-stats">
                         <p>总题数: <span id="total-q">0</span></p>
                         <p>正确数: <span id="correct-q">0</span></p>
@@ -106,7 +127,7 @@
             <div class="side-panel right-panel" id="right-panel">
                 <div id="search-section" class="panel-section setup-config">
                     <p class="section-title">快速查题</p>
-                    <input type="text" id="search-input" placeholder="输入 ID、编号或关键字..." 
+                    <input type="text" id="search-input" placeholder="输入 ID、编号或关键字..."
                         style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:10px;">
                     <div id="search-results" class="grid-scroll-container" style="max-height: 40vh; display:none;">
                     </div>
@@ -129,6 +150,7 @@
         </footer>
     </div>
     <script src="app.js"></script>
-    
+
 </body>
+
 </html>
