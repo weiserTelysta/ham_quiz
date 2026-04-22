@@ -2,7 +2,7 @@ let questions = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let selectedOptions = new Set();
-let currentBankName = ""; 
+let currentBankName = "";
 let autoTimer = null;
 let countdownInterval = null;
 let quizCount = 20; // 默认题目数量
@@ -17,7 +17,7 @@ let examTimeLeft = 0;    // ★ 新增：剩余秒数
 let passScore = 0;       // ★ 新增：及格分数线
 let wrongStore = JSON.parse(localStorage.getItem('ham_wrong_v3')) || {};
 
-window.onload = async function() {
+window.onload = async function () {
     renderWrongButtons();
     // 预加载全量题库用于搜索
     try {
@@ -32,16 +32,16 @@ function initSearch() {
     const input = document.getElementById('search-input');
     const resultsContainer = document.getElementById('search-results');
 
-    input.oninput = function() {
+    input.oninput = function () {
         const val = this.value.trim().toLowerCase();
         if (val.length < 2) {
             resultsContainer.style.display = 'none';
             return;
         }
 
-        const filtered = searchPool.filter(q => 
-            q.id.toLowerCase().includes(val) || 
-            q.jid.toLowerCase().includes(val) || 
+        const filtered = searchPool.filter(q =>
+            q.id.toLowerCase().includes(val) ||
+            q.jid.toLowerCase().includes(val) ||
             q.question.toLowerCase().includes(val)
         ).slice(0, 10); // 只显示前10条，防止卡顿
 
@@ -65,7 +65,7 @@ function jumpToSingleQuestion(qid) {
     const target = searchPool.find(q => q.id === qid);
     if (target) {
         questions = [target]; // 变成只有一个题的特殊“题库”
-        currentBankName = "full_bank.json"; 
+        currentBankName = "full_bank.json";
         initQuiz();
         // 隐藏搜索框结果
         document.getElementById('search-results').style.display = 'none';
@@ -79,7 +79,7 @@ function renderWrongButtons() {
     const clearBtn = document.getElementById('clear-wrong-btn'); // 獲取清空按鈕
     container.innerHTML = '';
     const stats = {};
-    
+
     const nameMap = {
         'bank_a.json': 'A 类题库',
         'bank_b.json': 'B 类题库',
@@ -138,16 +138,16 @@ function setCount(num) {
 function setMode(mode) {
     isNoRepeatMode = (mode === 'norepeat');
     document.querySelectorAll('.btn-mode').forEach(btn => {
-        btn.classList.toggle('active', 
-            (mode === 'norepeat' && btn.innerText.includes('不重复')) || 
+        btn.classList.toggle('active',
+            (mode === 'norepeat' && btn.innerText.includes('不重复')) ||
             (mode === 'random' && btn.innerText.includes('随机'))
         );
     });
-    
+
     // 更新提示文案和重置按钮
     const tip = document.getElementById('mode-tip');
     const clearBtn = document.getElementById('clear-history-btn');
-    if(isNoRepeatMode) {
+    if (isNoRepeatMode) {
         tip.innerText = "优先抽取你未做过的题目";
         clearBtn.style.display = "block";
     } else {
@@ -172,14 +172,14 @@ async function startQuiz(filename) {
     try {
         const response = await fetch(filename);
         const data = await response.json();
-        
+
         let pool = data;
 
         // 如果开启了“不重复模式”，则过滤掉已经做过的题
         if (isNoRepeatMode) {
             const doneIds = historyStore[filename] || [];
             let unseen = data.filter(q => !doneIds.includes(q.id));
-            
+
             // 题库刷完了的极端情况处理
             if (unseen.length === 0 && data.length > 0) {
                 alert("🎉 恭喜你！你已经刷完了本题库的所有题目。系统已自动为你重置该题库的进度，开启新一轮练习！");
@@ -197,9 +197,9 @@ async function startQuiz(filename) {
             questions = shuffled;
         }
         initQuiz();
-    } catch (e) { 
+    } catch (e) {
         console.error(e);
-        alert("题库加载失败，请检查网络或文件是否存在。"); 
+        alert("题库加载失败，请检查网络或文件是否存在。");
     }
 }
 
@@ -227,12 +227,12 @@ function initQuiz() {
     userSelections = new Array(questions.length).fill(null); // ★ 新增初始化
 
     showScreen('quiz-screen');
-    
+
     document.getElementById('left-panel').classList.add('panel-hidden');
     document.getElementById('search-section').style.display = 'none';
     document.getElementById('progress-section').style.display = 'block';
     document.getElementById('right-panel').classList.remove('panel-hidden');
-    
+
     initGrid();
     loadQuestion();
 }
@@ -256,9 +256,9 @@ function updateGridVisuals() {
     questions.forEach((_, index) => {
         const item = document.getElementById(`grid-item-${index}`);
         if (!item) return;
-        
+
         item.classList.remove('current', 'correct', 'wrong');
-        
+
         if (index === currentQuestionIndex) item.classList.add('current');
         if (userAnswers[index] === true) item.classList.add('correct');
         if (userAnswers[index] === false) item.classList.add('wrong');
@@ -282,7 +282,7 @@ function loadQuestion() {
         // 兼容性处理：如果后端数据没带后缀，前端自动补全
         let imgSrc = q.image;
         if (!imgSrc.includes('.')) {
-            imgSrc += '.webp'; 
+            imgSrc += '.webp';
         }
 
         imageHtml = `
@@ -304,12 +304,12 @@ function loadQuestion() {
 
     document.getElementById('progress').innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
     document.getElementById('score-display').innerText = `得分: ${score}`;
-    
+
     document.getElementById('prev-btn').classList.toggle('hidden', currentQuestionIndex === 0);
     document.getElementById('submit-btn').classList.remove('hidden');
     document.getElementById('submit-btn').disabled = true;
     document.getElementById('next-btn').classList.add('hidden');
-    document.getElementById('next-btn').innerText = "下一题"; 
+    document.getElementById('next-btn').innerText = "下一题";
     document.getElementById('feedback-area').classList.add('hidden');
 
     const typeBadge = document.getElementById('question-type');
@@ -320,6 +320,36 @@ function loadQuestion() {
     container.innerHTML = '';
     container.className = `options-grid ${isMultiple ? 'mode-multiple' : 'mode-single'}`;
 
+    if (!q._shuffled) {
+        // 1. 将原选项转为数组，包含原始的 key 和 text
+        let optArr = Object.keys(q.options).map(k => ({ originalKey: k, text: q.options[k] }));
+
+        // 2. 随机打乱选项数组
+        optArr.sort(() => Math.random() - 0.5);
+
+        // 3. 重新分配新的题号 (A, B, C, D)
+        const newOptions = {};
+        const newAnswer = [];
+        const labels = ['A', 'B', 'C', 'D', 'E', 'F']; // 足够覆盖绝大多数题目
+
+        optArr.forEach((item, index) => {
+            const newKey = labels[index];
+            newOptions[newKey] = item.text;
+
+            // 4. 如果这个选项的原始 key 在原本的答案数组里，就把新的 key 记入新答案
+            if (q.answer.includes(item.originalKey)) {
+                newAnswer.push(newKey);
+            }
+        });
+
+        // 5. 更新题目对象
+        q.options = newOptions;
+        q.answer = newAnswer;
+
+        // 6. 打上标记，保证这道题在本次答题/考试中如果被“上一题/下一题”切回来，顺序不会再变
+        q._shuffled = true;
+    }
+
     for (const [key, value] of Object.entries(q.options)) {
         const div = document.createElement('div');
         div.className = 'option-item';
@@ -327,19 +357,19 @@ function loadQuestion() {
         div.onclick = () => handleOptionClick(div, key, isMultiple);
         container.appendChild(div);
     }
-    
+
     updateGridVisuals();
 
     if (userAnswers[currentQuestionIndex] !== null) {
         const savedSelections = userSelections[currentQuestionIndex] || [];
         const isCorrect = userAnswers[currentQuestionIndex];
-        
+
         // 恢复选项的视觉状态
         document.querySelectorAll('.option-item').forEach(el => {
             const key = el.querySelector('span:nth-child(2)').innerText.replace('.', '').trim();
             if (q.answer.includes(key)) el.classList.add('correct');
             else if (savedSelections.includes(key)) el.classList.add('wrong');
-            
+
             if (savedSelections.includes(key)) el.classList.add('selected');
         });
 
@@ -347,13 +377,13 @@ function loadQuestion() {
         document.getElementById('submit-btn').classList.add('hidden');
         document.getElementById('next-btn').classList.remove('hidden');
         document.getElementById('next-btn').innerText = currentQuestionIndex === questions.length - 1 ? "查看结果" : "下一题";
-        
+
         // 显示反馈区域，但不触发 3 秒倒计时
         const fb = document.getElementById('feedback-area');
         fb.classList.remove('hidden');
         fb.className = `feedback ${isCorrect ? 'success' : 'error'}`;
         fb.innerHTML = isCorrect ? "✅ 回答正确！" : `❌ 错误。正确答案: ${q.answer.join('')}`;
-        
+
         // 清除任何可能的自动下一题提示
         document.getElementById('auto-next-tip').innerText = "";
     }
@@ -380,9 +410,9 @@ function submitAnswer() {
     const q = questions[currentQuestionIndex];
     const isCorrect = selectedOptions.size === q.answer.length && [...selectedOptions].every(v => q.answer.includes(v));
 
-    userAnswers[currentQuestionIndex] = isCorrect; 
+    userAnswers[currentQuestionIndex] = isCorrect;
     userSelections[currentQuestionIndex] = [...selectedOptions];
-    
+
     document.querySelectorAll('.option-item').forEach(el => {
         const key = el.querySelector('span:nth-child(2)').innerText.replace('.', '').trim();
         if (q.answer.includes(key)) el.classList.add('correct');
@@ -398,7 +428,7 @@ function submitAnswer() {
     } else {
         wrongStore[q.id] = { data: q, count: 0, bank: currentBankName };
     }
-    
+
     localStorage.setItem('ham_wrong_v3', JSON.stringify(wrongStore));
     if (!historyStore[currentBankName]) historyStore[currentBankName] = [];
     if (!historyStore[currentBankName].includes(q.id)) {
@@ -407,7 +437,7 @@ function submitAnswer() {
     }
 
     localStorage.setItem('ham_wrong_v3', JSON.stringify(wrongStore));
-    updateGridVisuals(); 
+    updateGridVisuals();
     renderWrongButtons();
 
     const fb = document.getElementById('feedback-area');
@@ -424,7 +454,7 @@ function submitAnswer() {
             autoTimer = setTimeout(() => nextQuestion(), 500);
         } else {
             // 回答错误：调用自动跳转逻辑，给 3 秒时间看正确答案
-            startAutoNext(3); 
+            startAutoNext(3);
         }
     } else {
         document.getElementById('next-btn').innerText = "查看结果";
@@ -435,10 +465,10 @@ function submitAnswer() {
 function startAutoNext(seconds) {
     let timeLeft = seconds;
     const tipEl = document.getElementById('auto-next-tip');
-    
+
     // 显示提示
     tipEl.innerText = `${timeLeft} 秒后自动下一题...`;
-    
+
     // 倒计时数字变动
     countdownInterval = setInterval(() => {
         timeLeft--;
@@ -458,7 +488,7 @@ function resetTimers() {
     clearTimeout(autoTimer);
     clearInterval(countdownInterval);
     const tipEl = document.getElementById('auto-next-tip');
-    if(tipEl) tipEl.innerText = "";
+    if (tipEl) tipEl.innerText = "";
 }
 
 function nextQuestion() {
@@ -483,7 +513,7 @@ function jumpToQuestion(index) {
     resetTimers();
     currentQuestionIndex = index;
     loadQuestion();
-    
+
     const activeItem = document.getElementById(`grid-item-${index}`);
     if (activeItem) {
         activeItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -500,15 +530,15 @@ function showResult() {
     // 结果页隐藏所有侧边栏
     document.getElementById('left-panel').classList.add('panel-hidden');
     document.getElementById('right-panel').classList.add('panel-hidden');
-    
+
     clearInterval(examTimer); // 停止倒计时
     document.getElementById('exam-timer-display').classList.add('hidden');
-    
+
     showScreen('result-screen');
-    
+
     document.getElementById('total-q').innerText = questions.length;
     document.getElementById('correct-q').innerText = score;
-    
+
     const accuracy = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
     document.getElementById('accuracy').innerText = `${accuracy}%`;
 
@@ -524,7 +554,7 @@ function showResult() {
     } else {
         statusEl.style.display = 'none';
     }
-    
+
     isExamMode = false; // 重置状态
 }
 
@@ -533,13 +563,13 @@ function goBackHome() {
     // 刷新或手动重置状态
     document.getElementById('search-section').style.display = 'block';
     document.getElementById('progress-section').style.display = 'none';
-    location.reload(); 
+    location.reload();
 }
 
 // ★ 新增：全真模拟考试组卷逻辑
 async function startMockExam(level) {
     isExamMode = true;
-    
+
     // 依据官方 2025 新规配置
     const examConfig = {
         'A': { file: 'bank_a.json', single: 32, multi: 8, time: 40 * 60, pass: 30 },
@@ -553,7 +583,7 @@ async function startMockExam(level) {
     try {
         const response = await fetch(examConfig.file);
         const data = await response.json();
-        
+
         // 区分单选和多选并打乱
         const singles = data.filter(q => q.type !== 'multiple').sort(() => Math.random() - 0.5);
         const multis = data.filter(q => q.type === 'multiple').sort(() => Math.random() - 0.5);
@@ -565,7 +595,7 @@ async function startMockExam(level) {
         ].sort(() => Math.random() - 0.5);
 
         questions = selectedQuestions;
-        
+
         document.getElementById('exam-timer-display').classList.remove('hidden');
         startExamTimer();
         initQuiz();
